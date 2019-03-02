@@ -1,11 +1,12 @@
 package com.data.desensitization.service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface DesensitizationAPI {
-	// data desensitize algorithm API
+	// data algorithm API
 	// parser the values according to the table field 
-	String desensitize(String valuesStr, ArrayList<String> field);
+	String desensitize(String valuesStr, List<String> field);
 	
 	
 	// truncated
@@ -13,7 +14,7 @@ public interface DesensitizationAPI {
 	
 	
 	// mask shield
-	boolean nameMask(String name, String output);
+	String nameMask(String name);
 	boolean idCardMask(String idCard, String output);
 	boolean addressMask(String address, String output);
 	

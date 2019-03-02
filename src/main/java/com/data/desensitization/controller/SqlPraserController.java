@@ -9,14 +9,19 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.data.desensitization.service.Desensitization;
+
 @EnableAutoConfiguration
 @RestController
 public class SqlPraserController {
+	@Autowired
+	public static Desensitization desensitize = new Desensitization();
 	
 	@RequestMapping("/")
 	public void fieldParsing() {
@@ -49,38 +54,48 @@ public class SqlPraserController {
 			
 			// test WordsList
 			/*for (int i = 0; i < WordsList.size(); i++) {
-				System.out.println(WordsList.get(i).toString());
+				System.out.println(WordsList.get(i));
 			}*/
 			
 			// filter the key words
 			for (int i = 0; i < WordsList.size(); i++) {
 				if (WordsList.get(i).contains("CREATE") && WordsList.get(i+1).contains("TABLE")) {
 					// save the table name
-					TableFieldList.add(reMoveVar(WordsList.get(i+2)) + "#");
+					TableFieldList.add(reMoveVar(WordsList.get(i+2), 1, 1) + "#");
 				}
 				if (WordsList.get(i).contains("varchar")|| WordsList.get(i).contains("int") 
 						|| WordsList.get(i).contains("datetime") || WordsList.get(i).contains("text")) {
 					// save the <field name, comment>
-					String field = WordsList.get(i-1).toString();
+					String field = reMoveVar(WordsList.get(i-1), 1, 1);
 					for (int j = i+1; !WordsList.get(j).contains(","); j++) {
 						if (WordsList.get(j).contains("COMMENT")) {
-							String temp
-							field = WordsList.get(j+1).substring(1, ); 
+							field = "<" + field + "," + reMoveVar(WordsList.get(j+1), 1, 4) + ">"; 
 						}
 					}
 					TableFieldList.add(field);
 				}
 				
 				// replace the values in the Insert SQL 
+				String output = "";
+				String valueTemp = "";
 				if (WordsList.get(i).contains("VALUES")) {
-					
+					int k = i;
+					while (!(WordsList.get(k+1).contains(";"))) {
+						valueTemp += WordsList.get(k+1);
+						valueTemp += " ";
+						++k;
+					}
+					valueTemp += WordsList.get(k+1);
+					output = desensitize.desensitize(valueTemp, TableFieldList);
+					WordsList.set(i+1, output);
+					//System.out.println(output);
 				}
 			}
 			
 			// test TableFieldList
-			for (int i = 0; i < TableFieldList.size(); i++) {
+			/*for (int i = 0; i < TableFieldList.size(); i++) {
 				System.out.println(TableFieldList.get(i));
-			}
+			}*/
 			
 			// split the TableFieldList into TableList and FieldList
 			/*int Tab = 1;
@@ -97,12 +112,14 @@ public class SqlPraserController {
 		}
 	}
 	
+	
+
 	/*
 	 * delete the first and the last characters 
 	 * 
 	 * */
-	public static String reMoveVar(String str) {
-		return str.substring(1, str.length() - 1);
+	public static String reMoveVar(String str, int begin, int end) {
+		return str.substring(begin, str.length() - end);
 	}
 	
 	public static void main(String[] args) {
