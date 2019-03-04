@@ -70,10 +70,10 @@ public class Desensitization implements DesensitizationAPI {
 			}
 		}
 		int j;
-		for (j = 0; j < s.length; j++) {
+		for (j = 0; j < s.length-1; j++) {
 			result = result + s[j] + ",";
 		}
-		//result += s[j];
+		result += s[j];
 		
 		return result;
 	}
