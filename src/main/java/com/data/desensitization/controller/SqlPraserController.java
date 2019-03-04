@@ -88,6 +88,7 @@ public class SqlPraserController {
 					valueTemp += WordsList.get(k+1);
 					output = desensitize.desensitize(valueTemp, TableFieldList);
 					WordsList.set(i+1, output);
+					//System.out.println(valueTemp);
 					//System.out.println(output);
 				}
 			}

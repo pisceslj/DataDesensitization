@@ -15,8 +15,11 @@ public interface DesensitizationAPI {
 	
 	// mask shield
 	String nameMask(String name);
-	boolean idCardMask(String idCard, String output);
-	boolean addressMask(String address, String output);
+	String idCardMask(String idCard);
+	String phoneMask(String phone);
+	String telMask(String tel);
+	String emailMask(String email);
+	String addressMask(String address, int sensitiveSize);
 	
 	// random replacement
 	
