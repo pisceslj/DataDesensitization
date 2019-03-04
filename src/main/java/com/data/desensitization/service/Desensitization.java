@@ -64,20 +64,16 @@ public class Desensitization implements DesensitizationAPI {
 			if (field.get(i).contains("email")) {
 				s[i-1] = "'" + emailMask(s[i-1]) + "'";
 			}
-			if (field.get(i).contains("address")) {
+			if (field.get(i).contains("addr")) {
 				int index = s[i-1].indexOf("路");
-				int index2 = s[i-1].indexOf("6");
-				System.out.println(index);
-				System.out.println(index2);
-				System.out.println(s[i-1]);
 				s[i-1] = "'" + addressMask(s[i-1], index) + "'";
 			}
 		}
 		int j;
-		for (j = 0; j < s.length-1; j++) {
+		for (j = 0; j < s.length; j++) {
 			result = result + s[j] + ",";
 		}
-		result += s[j];
+		//result += s[j];
 		
 		return result;
 	}

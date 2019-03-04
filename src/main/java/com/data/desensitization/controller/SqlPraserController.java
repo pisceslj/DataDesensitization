@@ -37,7 +37,7 @@ public class SqlPraserController {
 			// convert the byte stream into character stream
 			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, encoding);
 			// save SQL file's context into words
-			int str;
+			/*int str;
 			String word = "";
 			String temp = "";
 			while ( (str = inputStreamReader.read()) > 0) {
@@ -48,17 +48,33 @@ public class SqlPraserController {
 					WordsList.add(word);
 					word = "";
 				}
+			}*/
+			
+			// cut into string with ";"
+			int str2;
+			String word2 = "";
+			String temp2 = "";
+			List<String> sqlsList = new ArrayList<String>();
+			while ( (str2 = inputStreamReader.read()) > 0) {
+				if (!((char)str2 == ';')) {
+					temp2 = (char)str2 + "";
+					word2 = word2 + temp2;
+				} else {
+					sqlsList.add(word2);
+					word2 = "";
+				}
 			}
+			
 			inputStreamReader.close();
 			fileInputStream.close();
 			
 			// test WordsList
-			/*for (int i = 0; i < WordsList.size(); i++) {
-				System.out.println(WordsList.get(i));
-			}*/
+			for (int i = 0; i < sqlsList.size(); i++) {
+				System.out.println(sqlsList.get(i));
+			}
 			
 			// filter the key words
-			for (int i = 0; i < WordsList.size(); i++) {
+			/*for (int i = 0; i < WordsList.size(); i++) {
 				if (WordsList.get(i).contains("CREATE") && WordsList.get(i+1).contains("TABLE")) {
 					// save the table name
 					TableFieldList.add(reMoveVar(WordsList.get(i+2), 1, 1) + "#");
@@ -86,12 +102,13 @@ public class SqlPraserController {
 						++k;
 					}
 					valueTemp += WordsList.get(k+1);
+					//System.out.println(WordsList.get(k+1));
 					output = desensitize.desensitize(valueTemp, TableFieldList);
 					WordsList.set(i+1, output);
 					//System.out.println(valueTemp);
 					//System.out.println(output);
 				}
-			}
+			}*/
 			
 			// test TableFieldList
 			/*for (int i = 0; i < TableFieldList.size(); i++) {
