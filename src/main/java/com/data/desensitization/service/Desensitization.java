@@ -36,9 +36,11 @@ public class Desensitization implements DesensitizationAPI {
 				}
 				// match the values with the field
 				List<String> matchValue = new ArrayList<String>();
-				for (int j = 0; j < values.size(); j++) {
+				int j;
+				for (j = 0; j < values.size()-1; j++) {
 					result = result + "(" + doDesensitize(values.get(j), field) + ")" + ",";
 				}
+				result = result + "(" + doDesensitize(values.get(j), field) + ")";
 			}
 		}
 		return result;

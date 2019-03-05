@@ -1,12 +1,18 @@
 package com.data.desensitization.controller;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,41 +87,54 @@ public class SqlPraserController {
 				
 				if (sqlsList.get(i).contains("INSERT INTO")) {
 					// replace the values in the Insert SQL 
-					String insert = sqlsList.get(i);
-					String values = insert.substring(insert.indexOf("VALUES")+7);
+					String keywords = sqlsList.get(i).substring(0, sqlsList.get(i).indexOf("VALUES")+7);
+					String values = sqlsList.get(i).substring(sqlsList.get(i).indexOf("VALUES")+7);
 					String output = desensitize.desensitize(values, TableFieldList);
-					//WordsList.set(i+1, output);
-					System.out.println(values);
-					System.out.println(output);
+					sqlsList.set(i, keywords + output);
 				}
 			}
 			
-			// test TableFieldList
-			/*for (int k = 0; k < TableFieldList.size(); k++) {
-				System.out.println(TableFieldList);
+			// test sqlsList after data operation
+			/*for (int i = 0; i < sqlsList.size(); i++) {
+				System.out.println(sqlsList.get(i));
 			}*/
 			
-			// split the TableFieldList into TableList and FieldList
-			/*int Tab = 1;
-			for (int i = 0; i < TableFieldList.size(); i++) {
-				if (TableFieldList.get(i).contains("#")) {
-					if (Tab == 1) {
-						
-					}
-				}
+			// save the sqlsList to a SQL file
+			for (int i = 0; i < sqlsList.size(); i++) {
+				sqlsList.set(i, sqlsList.get(i) + ";");
 			}
-			*/
+			try {
+				writeNewSQLFile(sqlsList, path);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	// write the list values into a new SQL file
+	public static void writeNewSQLFile(List<String> sqls, String sqlPath) throws Exception {
+		String encode = "utf-8";
+		Date d = new Date();
+		try {
+			String newFile = sqlPath + d.getTime()+".sql";
+			File file = new File(newFile);
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(newFile), encode));
+			for (String l:sqls) {
+				writer.write(l + "\r\n");
+			}
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
-
-	/*
-	 * delete the first and the last characters 
-	 * 
-	 * */
+	// delete the first and the last characters 
 	public static String reMoveVar(String str, int begin, int end) {
 		return str.substring(begin, str.length() - end);
 	}
