@@ -64,17 +64,29 @@ public class SqlPraserController {
 			}*/
 			
 			for (int i = 0; i < sqlsList.size(); i++) {
+				/* 
+				 * filter the CREATE sentence 
+				 */
 				if (sqlsList.get(i).contains("CREATE TABLE")) {
 					// save the table name
-					String[] fields = sqlsList.get(i).split(" ");
+					String[] fields = sqlsList.get(i).split(" "); // split the CREATE sentence with blank space
+					String tablename = "";
 					for (int j = 0; j < fields.length; j++) {
 						if (fields[j].contains("CREATE") && fields[j+1].contains("TABLE")) {
 							if (fields[j+2].startsWith("`") && fields[j+2].endsWith("`")) {
-								TableFieldList.add(reMoveVar(fields[j+2], 1, 1) + "#");
+								tablename = reMoveVar(fields[j+2], 1, 1);
+								TableFieldList.add(tablename + "#");
 							}
 						}
-						if (fields[j].contains("varchar") || fields[j].contains("int") 
-								|| fields[j].contains("datetime") || fields[j].contains("text")) {
+						// match the fields
+						if (fields[j].contains("char") || fields[j].contains("varchar") || fields[j].contains("tinyblob") || 
+								fields[j].contains("tinytext") || fields[j].contains("blob") || fields[j].contains("text") || 
+								fields[j].contains("mediumblob") || fields[j].contains("mediumtext") || fields[j].contains("longblob") ||
+								fields[j].contains("longtext") || fields[j].contains("tinyint") || fields[j].contains("smallint") || 
+								fields[j].contains("mediumint") || fields[j].contains("int") || fields[j].contains("integer") ||
+								fields[j].contains("bigint") || fields[j].contains("float") || fields[j].contains("double") || 
+								fields[j].contains("date") || fields[j].contains("time") || fields[j].contains("year") || 
+								fields[j].contains("datetime") || fields[j].contains("timestamp")) {
 							// save the field name
 							if (fields[j-1].startsWith("`") && fields[j-1].endsWith("`")) {
 								TableFieldList.add(reMoveVar(fields[j-1], 1, 1));
@@ -83,16 +95,31 @@ public class SqlPraserController {
 							}
 						}
 					} // end for
-				} // end if
+					TableFieldList.add("##" + tablename + "##");  // set the flag which points to the end of the table's fields 
+				} // end if sentence which matches the CREATE TABLE
 				
+				/*
+				 * replace the values in the Insert SQL 
+				 */
+				List<String> TableFieldSubList = new ArrayList<String>();  // save the matched table's name and fields
 				if (sqlsList.get(i).contains("INSERT INTO")) {
-					// replace the values in the Insert SQL 
+					String tableName = sqlsList.get(i).split(" ")[2];
+					int fromIndex = TableFieldList.indexOf(reMoveVar(tableName, 1, 1)+"#");
+					int toIndex = TableFieldList.indexOf("##" + reMoveVar(tableName, 1, 1) + "##");
+					TableFieldSubList = TableFieldList.subList(fromIndex, toIndex);
 					String keywords = sqlsList.get(i).substring(0, sqlsList.get(i).indexOf("VALUES")+7);
 					String values = sqlsList.get(i).substring(sqlsList.get(i).indexOf("VALUES")+7);
-					String output = desensitize.desensitize(values, TableFieldList);
+					String output = desensitize.desensitize(values, TableFieldSubList);
 					sqlsList.set(i, keywords + output);
 				}
-			}
+				
+				/*
+				 *  replace the values in the Update SQL
+				 */
+				if (sqlsList.get(i).contains("UPDATE")) {
+					
+				}
+			} // end SQLs for
 			
 			// test sqlsList after data operation
 			/*for (int i = 0; i < sqlsList.size(); i++) {
@@ -126,8 +153,10 @@ public class SqlPraserController {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(newFile), encode));
 			for (String l:sqls) {
+				System.out.println(l);
 				writer.write(l + "\r\n");
 			}
+			writer.flush();
 			writer.close();
 		} catch (Exception e) {
 			e.printStackTrace();
