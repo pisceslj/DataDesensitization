@@ -26,7 +26,8 @@ public interface DesensitizationAPI {
 	
 	
 	// mapping replacement
-	boolean nameReplace(String name, String output);
+	String nameMapReplace(String name);
+	String idCardMapReplace(String idCard);
 	
 	
 	// address offset

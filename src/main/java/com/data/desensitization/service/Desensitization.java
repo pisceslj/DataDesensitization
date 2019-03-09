@@ -15,6 +15,8 @@ public class Desensitization implements DesensitizationAPI {
 	@Autowired
 	public static Desensitization desensitize;
 	
+	public static Utils utils = new Utils();
+	
 	@PostConstruct
 	public void init() {
 		desensitize = this;
@@ -55,7 +57,8 @@ public class Desensitization implements DesensitizationAPI {
 				s[i-1] = "'" + nameMask(s[i-1]) + "'";
 			}
 			if (field.get(i).contains("idCard")) {
-				s[i-1] = "'" + idCardMask(s[i-1]) + "'";
+				//s[i-1] = "'" + idCardMask(s[i-1]) + "'";
+				s[i-1] = "'" + idCardMapReplace(s[i-1]) + "'";
 			}
 			if (field.get(i).contains("phone")) {
 				s[i-1] = "'" + phoneMask(s[i-1]) + "'";
@@ -80,6 +83,9 @@ public class Desensitization implements DesensitizationAPI {
 		return result;
 	}
 	
+	/*
+	 * mask 
+	 */
 	@Override
 	public String nameMask(String fullName) {
 		if (StringUtils.isBlank(fullName)) {
@@ -146,10 +152,34 @@ public class Desensitization implements DesensitizationAPI {
 		return StringUtils.rightPad(StringUtils.left(addressTemp, index), length, "*");
 	}
 
+	/*
+	 * mapping replace 
+	 */
 	@Override
-	public boolean nameReplace(String name, String output) {
+	public String nameMapReplace(String name) {
 		// TODO Auto-generated method stub
-		return false;
+		return "";
 	}
 
+	@Override
+	public String idCardMapReplace(String idCard) {
+		if (StringUtils.isBlank(idCard)) {
+			return "";
+		}
+		String idCardTemp = idCard.substring(1, idCard.length()-1);
+		String[] codes = new String[3465]; // 3465
+		// initialize the address code
+		utils.initAddressCode(codes);
+		// create a key S to encode the true address code
+		String newAddr = codes[utils.encodeAddrCode(idCardTemp.substring(0, 5), codes.length)];
+		String newAddrCode = newAddr.split(" ")[0];
+		// change the date
+		String newDate = utils.encodeDate(idCardTemp.substring(6, 13)) + "";
+		// calculate the new sequence code
+		String newSeqCode = utils.calSeqCode(idCardTemp.substring(14, 17)) + "";
+		// calculate the new check code
+		String newCheckCode = utils.calCheckCode(newAddrCode + newDate + newSeqCode);
+		
+		return newAddrCode + newDate + newSeqCode + newCheckCode;
+	}
 }

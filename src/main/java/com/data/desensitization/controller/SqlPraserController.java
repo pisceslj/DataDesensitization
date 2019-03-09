@@ -153,7 +153,6 @@ public class SqlPraserController {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(newFile), encode));
 			for (String l:sqls) {
-				System.out.println(l);
 				writer.write(l + "\r\n");
 			}
 			writer.flush();
