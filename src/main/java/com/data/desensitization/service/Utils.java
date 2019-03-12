@@ -1,15 +1,27 @@
 package com.data.desensitization.service;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 
 public class Utils {
 	// read the address code into array codes
@@ -121,4 +133,78 @@ public class Utils {
 		cal.setTimeInMillis(newTime);
 		return dateFormat.format(cal.getTime()).toString();
 	}
+	
+	// convert the address into longitude and latitude
+	public String convertAddr(String address) {
+		BufferedReader in = null;
+		String lng = "";
+		String lat = "";
+		try {
+			address = URLEncoder.encode(address, "UTF-8");
+			URL tirc = new URL("http://api.map.baidu.com/geocoder?address="+ address +"&output=json&key="+"7d9fbeb43e975cd1e9477a7e5d5e192a");  
+         in = new BufferedReader(new InputStreamReader(tirc.openStream(),"UTF-8"));  
+         String res;  
+         StringBuilder sb = new StringBuilder("");  
+         while((res = in.readLine())!=null){  
+        	 	sb.append(res.trim());  
+            }  
+         String str = sb.toString();  
+         if(StringUtils.isNotEmpty(str)) {  
+            int lngStart = str.indexOf("lng\":");  
+            int lngEnd = str.indexOf(",\"lat");  
+            int latEnd = str.indexOf("},\"precise");  
+            if(lngStart > 0 && lngEnd > 0 && latEnd > 0) {  
+               lng = str.substring(lngStart+5, lngEnd);  
+               lat = str.substring(lngEnd+7, latEnd);  
+                }  
+            }  
+      } catch (Exception e) {  
+            e.printStackTrace();  
+      } finally {  
+          try {  
+            in.close();  
+          } catch (IOException e) {  
+            e.printStackTrace();  
+             }  
+         }
+		return lng + ":" + lat;
+	}
+	
+	// convert the longitude and latitude into new address
+	public String convertPosition(double lng, double lat) throws MalformedURLException {
+		String longitude = lng + "";
+		String latitude = lat + "";
+		BufferedReader in = null;
+		String newAddr = "";
+		URL tirc = new URL("http://api.map.baidu.com/geocoder?location="+ latitude+","+longitude+"&output=json&key="+"E4805d16520de693a3fe707cdc962045");  
+		try {
+			in = new BufferedReader(new InputStreamReader(tirc.openStream(),"UTF-8"));
+			String res;  
+		   StringBuilder sb = new StringBuilder("");  
+		   while((res = in.readLine()) != null) {  
+			   sb.append(res.trim());  
+		    }  
+		   String str = sb.toString();
+		   ObjectMapper mapper = new ObjectMapper();
+		   JsonNode locationNode = null;
+		   JsonNode resultNode = null;
+		   if(StringUtils.isNotEmpty(str)) {  
+			   JsonNode jsonNode = mapper.readTree(str);
+		      jsonNode.findValue("status").toString();
+		      resultNode = jsonNode.findValue("result");
+		      locationNode = resultNode.findValue("formatted_address");
+		    }
+		   newAddr = mapper.writeValueAsString(locationNode);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return newAddr;
+	}
+	
+	// delete the first and the last characters 
+		public String reMoveVar(String str, int begin, int end) {
+			return str.substring(begin, str.length() - end);
+		}
 }

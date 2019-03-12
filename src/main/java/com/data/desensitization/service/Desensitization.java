@@ -1,5 +1,6 @@
 package com.data.desensitization.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -157,10 +158,46 @@ public class Desensitization implements DesensitizationAPI {
 	 */
 	@Override
 	public String nameMapReplace(String name) {
-		// TODO Auto-generated method stub
+		
+		
 		return "";
 	}
 
+	@Override
+	public String addressMapReplace(String address, int select) {
+		// convert the address into longitude and latitude
+		String result = utils.convertAddr(address);
+		double lng = Float.parseFloat(result.split(":")[0]);
+		double lat = Float.parseFloat(result.split(":")[1]);
+		// select the algorithm to deal with longitude and latitude
+		switch(select) {
+		case 1:
+			// data jitter: 1 degree is equal to 111 kilometers
+			lng = lng + 1.1;
+			lat = lat + 1.1;
+			if (lng < 73.66 || lng > 135.05) {
+				lng = lng * 0.95;
+			}
+			if (lat < 3.86 || lat > 53.55) {
+				lat = lat * 0.95;
+			}
+			break;
+		case 2:
+			// random exchange
+			break;
+		case 3:
+			// fuzzification
+			break;
+		}
+		String newAddress = "";
+		try {
+			newAddress = utils.convertPosition(lng, lat);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return utils.reMoveVar(newAddress, 1, 1)  +  "******";
+	}
+	
 	@Override
 	public String idCardMapReplace(String idCard) {
 		if (StringUtils.isBlank(idCard)) {

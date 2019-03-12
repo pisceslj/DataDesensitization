@@ -92,4 +92,10 @@ public class DataDesensitizationApplicationTests {
 		// create a key S to encode the true address code
 		//String newAddrCode = codes[encodeAddrCode(idCard.substring(0, 5))];
 	}
+	
+	@Test
+	public void TestAddressMapReplace() {
+		String str = desensitize.addressMapReplace("北京市海淀区科学院南路6号中科院计算所", 1);
+		System.out.println(str);
+	}
 }

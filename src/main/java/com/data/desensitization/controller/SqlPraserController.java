@@ -22,12 +22,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.data.desensitization.service.Desensitization;
+import com.data.desensitization.service.Utils;
 
 @EnableAutoConfiguration
 @RestController
 public class SqlPraserController {
 	@Autowired
 	public static Desensitization desensitize = new Desensitization();
+	
+	public static Utils utils = new Utils();
 	
 	@RequestMapping("/")
 	public void fieldParsing() {
@@ -74,7 +77,7 @@ public class SqlPraserController {
 					for (int j = 0; j < fields.length; j++) {
 						if (fields[j].contains("CREATE") && fields[j+1].contains("TABLE")) {
 							if (fields[j+2].startsWith("`") && fields[j+2].endsWith("`")) {
-								tablename = reMoveVar(fields[j+2], 1, 1);
+								tablename = utils.reMoveVar(fields[j+2], 1, 1);
 								TableFieldList.add(tablename + "#");
 							}
 						}
@@ -89,7 +92,7 @@ public class SqlPraserController {
 								fields[j].contains("datetime") || fields[j].contains("timestamp")) {
 							// save the field name
 							if (fields[j-1].startsWith("`") && fields[j-1].endsWith("`")) {
-								TableFieldList.add(reMoveVar(fields[j-1], 1, 1));
+								TableFieldList.add(utils.reMoveVar(fields[j-1], 1, 1));
 							} else {
 								break; // meet some pseudo match
 							}
@@ -104,8 +107,8 @@ public class SqlPraserController {
 				List<String> TableFieldSubList = new ArrayList<String>();  // save the matched table's name and fields
 				if (sqlsList.get(i).contains("INSERT INTO")) {
 					String tableName = sqlsList.get(i).split(" ")[2];
-					int fromIndex = TableFieldList.indexOf(reMoveVar(tableName, 1, 1)+"#");
-					int toIndex = TableFieldList.indexOf("##" + reMoveVar(tableName, 1, 1) + "##");
+					int fromIndex = TableFieldList.indexOf(utils.reMoveVar(tableName, 1, 1)+"#");
+					int toIndex = TableFieldList.indexOf("##" + utils.reMoveVar(tableName, 1, 1) + "##");
 					TableFieldSubList = TableFieldList.subList(fromIndex, toIndex);
 					String keywords = sqlsList.get(i).substring(0, sqlsList.get(i).indexOf("VALUES")+7);
 					String values = sqlsList.get(i).substring(sqlsList.get(i).indexOf("VALUES")+7);
@@ -160,11 +163,6 @@ public class SqlPraserController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
-	// delete the first and the last characters 
-	public static String reMoveVar(String str, int begin, int end) {
-		return str.substring(begin, str.length() - end);
 	}
 	
 	public static void main(String[] args) {
