@@ -1,6 +1,7 @@
 package com.data.desensitization.service;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +9,9 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.data.desensitization.service.datastructure.BPlusTree;
+
 import org.apache.commons.lang.StringUtils;
 
 @Component
@@ -55,7 +59,8 @@ public class Desensitization implements DesensitizationAPI {
 		for (int i = 0; i < field.size(); i++) {
 			// execute the data algorithm
 			if (field.get(i).contains("name")) {
-				s[i-1] = "'" + nameMask(s[i-1]) + "'";
+				//s[i-1] = "'" + nameMask(s[i-1]) + "'";
+				s[i-1] = "'" + nameMapReplace(s[i-1]) + "'";
 			}
 			if (field.get(i).contains("idCard")) {
 				//s[i-1] = "'" + idCardMask(s[i-1]) + "'";
@@ -158,9 +163,65 @@ public class Desensitization implements DesensitizationAPI {
 	 */
 	@Override
 	public String nameMapReplace(String name) {
+		if (StringUtils.isBlank(name)) {
+			return "";
+		}
+		String nameTemp = name.substring(1, name.length()-1);
+		int size1 = 101;
+		int size2 = 134; 
+		int order = 4;
+		String[] nameDB = new String[101];
+		String[] names = new String[101];
+		Double[] proportion = new Double[101];
+		String[] firstnameDB = new String[134];
+		String[] firstnames = new String[134];
+		Double[] firstProportion = new Double[134];
+		//get the nameDatabase and split the name and its proportion
+		utils.getNameDatabase(nameDB, "surname");
+		DecimalFormat df = new DecimalFormat("0.000000");
+		for (int i = 0; i < nameDB.length; i++) {
+			if (nameDB[i] != null) {
+				names[i] = nameDB[i].split(" ")[0];
+				proportion[i] = Double.valueOf(df.format(Double.valueOf(nameDB[i].split(" ")[1])));
+			}
+		}
+		// initialize the B+ Tree with the surname's proportion and the first name's proportion
+		BPlusTree<Double, String> tree1 = new BPlusTree<Double, String>(order);
+		for (int i = 0; i < size1; i++) {
+			if (proportion[i] != null && names[i] != null) {
+				tree1.insert(proportion[i], names[i]);
+			}
+		}
+		// change the surname randomly
+		double randomNumber1 = Math.random();
+		randomNumber1 = Double.valueOf(df.format(Double.valueOf(randomNumber1)));
+		String surname = tree1.get(randomNumber1);
 		
+		// get the firstname and split the first name and its proportion
+		utils.getNameDatabase(firstnameDB, "firstname");
+		for (int i = 0; i < firstnameDB.length; i++) {
+			if (firstnameDB[i] != null) {
+				firstnames[i] = firstnameDB[i].split(" ")[0];
+				firstProportion[i] = Double.valueOf(df.format(Double.valueOf(firstnameDB[i].split(" ")[1])));
+			}
+		}
+		// initialize the B+ Tree with the first name's proportion
+		BPlusTree<Double, String> tree2 = new BPlusTree<Double, String>(order);
+		for (int j = 0; j < size2; j++) {
+			if (firstProportion[j] != null && firstnames[j] != null) {
+				tree2.insert(firstProportion[j], firstnames[j]);
+			}
+		}
+		// change the first name randomly
+		// according to the length of the name
+		String firstname = "";
+		for (int k = 1; k < nameTemp.length(); k++) {
+			double randomNumber2 = Math.random();
+			randomNumber2 = Double.valueOf(df.format(Double.valueOf(randomNumber2)));
+			firstname += tree2.get(randomNumber2);
+		}
 		
-		return "";
+		return surname+firstname;
 	}
 
 	@Override
