@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.data.desensitization.controller.DbController;
 import com.data.desensitization.service.Desensitization;
 import com.data.desensitization.service.Utils;
 import com.data.desensitization.service.datastructure.BPlusTree;
@@ -148,6 +149,9 @@ public class DataDesensitizationApplicationTests {
 		long duration = System.currentTimeMillis() - current;
 		System.out.println("time elpsed for duration: " + duration);
 	}
-
-	 
+	private DbController db = new DbController();
+	@Test
+	public void testDbConnector() {
+		System.out.println(db.getData("privateinfo"));
+	}
 }

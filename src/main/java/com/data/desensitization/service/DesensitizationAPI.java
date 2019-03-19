@@ -2,11 +2,12 @@ package com.data.desensitization.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public interface DesensitizationAPI {
 	// data algorithm API
 	// parser the values according to the table field 
-	String desensitize(String valuesStr, List<String> field);
+	Map<String, Object> desensitize(Map<String, Object>list);
 	
 	
 	// truncated

@@ -3,7 +3,11 @@ package com.data.desensitization.service;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
@@ -28,65 +32,43 @@ public class Desensitization implements DesensitizationAPI {
 	}
 	
 	@Override
-	public String desensitize(String valuesStr, List<String> field) {
-		String result = "";
-		// parser INSERT VALUES 
-		for (int i = 0; i < field.size(); i++) {
-			// check the table name
-			if (field.get(i).contains("#")) {
-				// split the field value
-				List<String> values = new ArrayList<String>();
-				int fromIndex = 0;
-				while (valuesStr.indexOf("(", fromIndex) != -1) {
-					values.add(valuesStr.substring(valuesStr.indexOf("(", fromIndex)+1, valuesStr.indexOf(")", fromIndex)));
-					fromIndex = valuesStr.indexOf(")", fromIndex) + 1;
+	public Map<String, Object> desensitize(Map<String, Object>list) {
+		Object key = null;
+		Object value = null;
+		Set<Entry<String, Object>> entries = list.entrySet();
+		if(entries != null) {
+			Iterator<Entry<String, Object>> iterator = entries.iterator();
+			while(iterator.hasNext()) {
+				Entry<String, Object> entry =(Entry<String, Object>) iterator.next();
+				key = entry.getKey();
+				value = entry.getValue();
+				
+				// execute the data algorithm
+				if (key.toString().contains("name")) {
+					//value = nameMask(value);
+					value = nameMapReplace(value.toString());
 				}
-				// match the values with the field
-				List<String> matchValue = new ArrayList<String>();
-				int j;
-				for (j = 0; j < values.size()-1; j++) {
-					result = result + "(" + doDesensitize(values.get(j), field) + ")" + ",";
+				if (key.toString().contains("idCard")) {
+					//value = idCardMask(value);
+					value = idCardMapReplace(value.toString());
 				}
-				result = result + "(" + doDesensitize(values.get(j), field) + ")";
+				if (key.toString().contains("phone")) {
+					value = phoneMask(value.toString());
+				}
+				if (key.toString().contains("tel")) {
+					value = telMask(value.toString());
+				}
+				if (key.toString().contains("email")) {
+					value = emailMask(value.toString());
+				}
+				if (key.toString().contains("addr")) {
+					int index = value.toString().indexOf("路");
+					value = addressMask(value.toString(), index);
+				}
+				entry.setValue(value);
 			}
-		}
-		return result;
-	}
-
-	public String doDesensitize(String str, List<String> field) {
-		String result = "";
-		String[] s = str.split(",");
-		for (int i = 0; i < field.size(); i++) {
-			// execute the data algorithm
-			if (field.get(i).contains("name")) {
-				//s[i-1] = "'" + nameMask(s[i-1]) + "'";
-				s[i-1] = "'" + nameMapReplace(s[i-1]) + "'";
-			}
-			if (field.get(i).contains("idCard")) {
-				//s[i-1] = "'" + idCardMask(s[i-1]) + "'";
-				s[i-1] = "'" + idCardMapReplace(s[i-1]) + "'";
-			}
-			if (field.get(i).contains("phone")) {
-				s[i-1] = "'" + phoneMask(s[i-1]) + "'";
-			}
-			if (field.get(i).contains("tel")) {
-				s[i-1] = "'" + telMask(s[i-1]) + "'";
-			}
-			if (field.get(i).contains("email")) {
-				s[i-1] = "'" + emailMask(s[i-1]) + "'";
-			}
-			if (field.get(i).contains("addr")) {
-				int index = s[i-1].indexOf("路");
-				s[i-1] = "'" + addressMask(s[i-1], index) + "'";
-			}
-		}
-		int j;
-		for (j = 0; j < s.length-1; j++) {
-			result = result + s[j] + ",";
-		}
-		result += s[j];
-		
-		return result;
+       }// end of if
+		return list;
 	}
 	
 	/*
@@ -153,9 +135,8 @@ public class Desensitization implements DesensitizationAPI {
 		if (StringUtils.isBlank(address)) {
 			return "";
 		}
-		String addressTemp = address.substring(1, address.length()-1);
-		int length = StringUtils.length(addressTemp);
-		return StringUtils.rightPad(StringUtils.left(addressTemp, index), length, "*");
+		int length = StringUtils.length(address);
+		return StringUtils.rightPad(StringUtils.left(address, index), length, "*");
 	}
 
 	/*
@@ -166,7 +147,6 @@ public class Desensitization implements DesensitizationAPI {
 		if (StringUtils.isBlank(name)) {
 			return "";
 		}
-		String nameTemp = name.substring(1, name.length()-1);
 		int size1 = 101;
 		int size2 = 134; 
 		int order = 4;
@@ -215,7 +195,7 @@ public class Desensitization implements DesensitizationAPI {
 		// change the first name randomly
 		// according to the length of the name
 		String firstname = "";
-		for (int k = 1; k < nameTemp.length(); k++) {
+		for (int k = 1; k < name.length(); k++) {
 			double randomNumber2 = Math.random();
 			randomNumber2 = Double.valueOf(df.format(Double.valueOf(randomNumber2)));
 			firstname += tree2.get(randomNumber2);
@@ -264,17 +244,16 @@ public class Desensitization implements DesensitizationAPI {
 		if (StringUtils.isBlank(idCard)) {
 			return "";
 		}
-		String idCardTemp = idCard.substring(1, idCard.length()-1);
 		String[] codes = new String[3465]; // 3465
 		// initialize the address code
 		utils.initAddressCode(codes);
 		// create a key S to encode the true address code
-		String newAddr = codes[utils.encodeAddrCode(idCardTemp.substring(0, 5), codes.length)];
+		String newAddr = codes[utils.encodeAddrCode(idCard.substring(0, 5), codes.length)];
 		String newAddrCode = newAddr.split(" ")[0];
 		// change the date
-		String newDate = utils.encodeDate(idCardTemp.substring(6, 13)) + "";
+		String newDate = utils.encodeDate(idCard.substring(6, 13)) + "";
 		// calculate the new sequence code
-		String newSeqCode = utils.calSeqCode(idCardTemp.substring(14, 17)) + "";
+		String newSeqCode = utils.calSeqCode(idCard.substring(14, 17)) + "";
 		// calculate the new check code
 		String newCheckCode = utils.calCheckCode(newAddrCode + newDate + newSeqCode);
 		
