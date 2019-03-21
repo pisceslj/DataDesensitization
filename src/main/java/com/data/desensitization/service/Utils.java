@@ -13,6 +13,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,8 +24,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-
 
 public class Utils {
 	// read the address code into array codes
@@ -235,5 +237,37 @@ public class Utils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public Map<String, String> initFieldClasses(Map<String, String> classes) {
+		try {
+			String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+			String encoding = "utf-8";
+			File file = new File(path + "fieldClass");
+			FileInputStream fileInputStream = new FileInputStream(file);
+			// convert the byte stream into character stream
+			InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, encoding);
+			// save file's context into words with ";"
+			int str;
+			String word = "";
+			String temp = "";
+			while ((str = inputStreamReader.read()) > 0) {
+				if (!((char)str == '\n')) {
+					temp = (char)str + "";
+					word = word + temp;
+				} else {
+					String[] t = word.split(":");
+					if (t.length == 2) {
+						classes.put(t[0], t[1]);
+					}
+					word = "";
+				}
+			}
+			inputStreamReader.close();
+			fileInputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return classes;
 	}
 }

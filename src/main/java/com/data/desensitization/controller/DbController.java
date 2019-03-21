@@ -59,7 +59,7 @@ public class DbController {
 		}
 		table = "`" + table + "`";
 		String sql = "insert into " + table + " " + field + " values " + values;
-		System.out.println(sql);
+		//System.out.println(sql);
 		return jdbc2.update(sql);
 	}
 }

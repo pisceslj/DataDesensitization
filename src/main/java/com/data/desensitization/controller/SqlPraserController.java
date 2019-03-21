@@ -48,6 +48,7 @@ public class SqlPraserController {
 	
 	@RequestMapping("/parse")
 	public void fieldParsing() {
+		System.out.println("Start");
 		// config the change object
 		// get all the tables' name from the source database
 		String FindTables = "select table_name from information_schema.tables where table_schema='"+database+"'";
