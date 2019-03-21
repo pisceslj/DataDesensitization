@@ -9,8 +9,12 @@ the file firstname contains 133 firstname with its proportion.
 
 the name map replace result as follows:
 
-![Image text](https://github.com/pisceslj/DataDesensitization/blob/master/nameMapReplace.jpg)
+![Image text](https://github.com/pisceslj/DataDesensitization/blob/master/pictures/nameMapReplace.jpg)
 
 convert from a source database to the target database result as follows：
 
-![Image text](https://github.com/pisceslj/DataDesensitization/blob/master/convert.jpg)
+![Image text](https://github.com/pisceslj/DataDesensitization/blob/master/pictures/convert.jpg)
+
+the result of the multiple tables data desensitisiton from source database to a target database as follows:
+
+![Image text](https://github.com/pisceslj/DataDesensitization/blob/master/pictures/result.jpg)
