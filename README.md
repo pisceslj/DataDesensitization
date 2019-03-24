@@ -18,3 +18,9 @@ convert from a source database to the target database result as follows：
 the result of the multiple tables data desensitisiton from source database to a target database as follows:
 
 ![Image text](https://github.com/pisceslj/DataDesensitization/blob/master/pictures/result.jpg)
+
+TEST is as follows:
+
+I created a database with millions data, the database is as follows:
+
+![Image text](https://github.com/pisceslj/DataDesensitization/blob/master/pictures/millions.jpg)
