@@ -139,8 +139,9 @@ public class Utils {
 	// convert the address into longitude and latitude
 	public String convertAddr(String address) {
 		BufferedReader in = null;
-		String lng = "";
-		String lat = "";
+		// must set the default data to prevent the Baidu map API failed
+		String lng = "116.23";
+		String lat = "39.54";
 		try {
 			address = URLEncoder.encode(address, "UTF-8");
 			URL tirc = new URL("http://api.map.baidu.com/geocoder?address="+ address +"&output=json&key="+"7d9fbeb43e975cd1e9477a7e5d5e192a");  
@@ -152,8 +153,8 @@ public class Utils {
             }  
          String str = sb.toString();  
          if(StringUtils.isNotEmpty(str)) {  
-            int lngStart = str.indexOf("lng\":");  
-            int lngEnd = str.indexOf(",\"lat");  
+            int lngStart = str.indexOf("lng\":");
+            int lngEnd = str.indexOf(",\"lat");
             int latEnd = str.indexOf("},\"precise");  
             if(lngStart > 0 && lngEnd > 0 && latEnd > 0) {  
                lng = str.substring(lngStart+5, lngEnd);  
