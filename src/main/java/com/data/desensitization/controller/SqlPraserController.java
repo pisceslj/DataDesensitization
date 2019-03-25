@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -46,12 +47,14 @@ public class SqlPraserController {
 	@Value("${src.database}")
 	private String database;
 	
+	@Value("${batch.size}")
+	private BigInteger batchSize;
+	
 	@RequestMapping("/parse")
 	public void fieldParsing() {
-		System.out.println("Start");
 		// config the change object
 		// get all the tables' name from the source database
-		String FindTables = "select table_name from information_schema.tables where table_schema='"+database+"'";
+		String FindTables = "select table_name from information_schema.tables where table_schema='" + database + "'";
 		List<Map<String, Object>> tables = db.getData(FindTables);
 		
 		for (Map<String, Object> map : tables) {
@@ -64,12 +67,22 @@ public class SqlPraserController {
                value = entry.getValue();
             	}
 	       	}
-         String FindData = "select * from "+value;
-         List<Map<String, Object>> lists = db.getData(FindData);
-         for (Map<String, Object> list : lists) {
-        	 	Map<String, Object> newData = desensitize.desensitize(list);
-        	 	db.insert(value.toString(), newData);
-         	}
-		}				
+         // get the total number of each table
+         String getTotalNums = "explain select count(*) from " + value;
+         BigInteger total = db.getTotalNums(getTotalNums);
+         BigInteger begin = new BigInteger("0");
+         // slice the data in the tables
+         while (begin.compareTo(total) <= 0) {
+        	 	String FindData = "select * from "+ value + " limit " + batchSize + " offset " + begin;
+        	 	List<Map<String, Object>> lists = db.getData(FindData);
+        	 	for (Map<String, Object> list : lists) {
+        	 		// desensitize the data one by one
+        	 		Map<String, Object> newData = desensitize.desensitize(list);
+        	 		// insert the new data into the new database
+        	 		db.insert(value.toString(), newData);
+        	 	}
+        	 	begin = begin.add(batchSize);
+            }
+         }				
 	}
 }

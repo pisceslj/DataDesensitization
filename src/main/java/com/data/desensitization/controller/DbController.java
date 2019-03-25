@@ -1,7 +1,9 @@
 package com.data.desensitization.controller;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,17 @@ public class DbController {
 		if (jdbc != null)
 			list = jdbc.queryForList(sql);
 		return list;
+	}
+	
+	// total number
+	public BigInteger getTotalNums(String sql) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		BigInteger total;
+		if (jdbc != null) {
+			map = jdbc.queryForMap(sql);
+		}
+		total = (BigInteger) map.get("rows");
+		return total;
 	}
 	
 	// insert a new data

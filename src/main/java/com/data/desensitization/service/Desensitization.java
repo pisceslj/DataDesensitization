@@ -48,13 +48,13 @@ public class Desensitization implements DesensitizationAPI {
 					List<String> fieldList = Arrays.asList(v);
 					// execute the data algorithm
 					if (k.contains("NAME") && fieldList.contains(key)) {
-						//value = nameMask(value,toString());
-						value = nameMapReplace(value.toString());
+						value = nameMask(value.toString());
+						//value = nameMapReplace(value.toString());
 						break;
 					}
 					if (k.contains("IDCARD") && fieldList.contains(key)) {
-						//value = idCardMask(value.toString());
-						value = idCardMapReplace(value.toString());
+						value = idCardMask(value.toString());
+						//value = idCardMapReplace(value.toString());
 						break;
 					}
 					if (k.contains("PHONE") && fieldList.contains(key)) {
@@ -70,8 +70,9 @@ public class Desensitization implements DesensitizationAPI {
 						break;
 					}
 					if (k.contains("ADDRESS") && fieldList.contains(key)) {
-						int index = value.toString().indexOf("路");
-						value = addressMask(value.toString(), index);
+						//int index = value.toString().indexOf("路");
+						//value = addressMask(value.toString(), index);
+						value = addressMapReplace(value.toString(), 1); // select the first method
 						break;
 					}
 				}
@@ -89,10 +90,9 @@ public class Desensitization implements DesensitizationAPI {
 		if (StringUtils.isBlank(fullName)) {
 			return "";
 		}
-		String fullNameTemp = fullName.substring(1, fullName.length()-1);
-		String name = StringUtils.left(fullNameTemp, 1);
+		String name = StringUtils.left(fullName, 1);
 		
-		return StringUtils.rightPad(name, StringUtils.length(fullNameTemp), "*");
+		return StringUtils.rightPad(name, StringUtils.length(fullName), "*");
 	}
 
 	@Override
@@ -100,10 +100,9 @@ public class Desensitization implements DesensitizationAPI {
 		if (StringUtils.isBlank(idCard)) {
 			return "";
 		}
-		String idCardTemp = idCard.substring(1, idCard.length()-1);
-		String idcard = StringUtils.right(idCardTemp, 4);
+		String idcard = StringUtils.right(idCard, 4);
 		
-		return StringUtils.leftPad(idcard, StringUtils.length(idCardTemp), "*");
+		return StringUtils.leftPad(idcard, StringUtils.length(idCard), "*");
 	}
 
 	@Override
@@ -111,9 +110,8 @@ public class Desensitization implements DesensitizationAPI {
 		if (StringUtils.isBlank(phone)) {
 			return "";
 		}
-		String phoneTemp = phone.substring(1, phone.length()-1);
 		
-		return StringUtils.left(phoneTemp, 3).concat(StringUtils.removeStart(StringUtils.leftPad(StringUtils.right(phoneTemp, 4), StringUtils.length(phoneTemp), "*"), "***"));
+		return StringUtils.left(phone, 3).concat(StringUtils.removeStart(StringUtils.leftPad(StringUtils.right(phone, 4), StringUtils.length(phone), "*"), "***"));
 	}
 
 	@Override
@@ -121,9 +119,8 @@ public class Desensitization implements DesensitizationAPI {
 		if (StringUtils.isBlank(tel)) {
 			return "";
 		}
-		String telTemp = tel.substring(1, tel.length()-1);
 		
-		return StringUtils.leftPad(StringUtils.right(telTemp, 4), StringUtils.length(telTemp), "*");
+		return StringUtils.leftPad(StringUtils.right(tel, 4), StringUtils.length(tel), "*");
 	}
 	
 	@Override
@@ -131,12 +128,12 @@ public class Desensitization implements DesensitizationAPI {
 		if (StringUtils.isBlank(email)) {
 			return "";
 		}
-		String emailTemp = email.substring(1, email.length()-1);
-		int index = StringUtils.indexOf(emailTemp, "@");
+		
+		int index = StringUtils.indexOf(email, "@");
 		if (index <= 1) {
-			return emailTemp;
+			return email;
 		} else {
-			return StringUtils.rightPad(StringUtils.left(emailTemp, 1), index, "*").concat(StringUtils.mid(emailTemp, index, StringUtils.length(emailTemp)));
+			return StringUtils.rightPad(StringUtils.left(email, 1), index, "*").concat(StringUtils.mid(email, index, StringUtils.length(email)));
 		}
 	}
 	
