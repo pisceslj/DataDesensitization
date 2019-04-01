@@ -20,11 +20,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,7 +48,10 @@ public class SqlPraserController {
 	public static Utils utils = new Utils();
 	
 	@Value("${src.database}")
-	private String database;
+	private String srcDatabase;
+	
+	@Value("${dst.database}")
+	private String dstDatabase;
 	
 	@Value("${batch.size}")
 	private BigInteger batchSize;
@@ -54,7 +60,7 @@ public class SqlPraserController {
 	public void fieldParsing() {
 		// config the change object
 		// get all the tables' name from the source database
-		String FindTables = "select table_name from information_schema.tables where table_schema='" + database + "'";
+		String FindTables = "select table_name from information_schema.tables where table_schema='" + srcDatabase + "'";
 		List<Map<String, Object>> tables = db.getData(FindTables);
 		
 		for (Map<String, Object> map : tables) {
@@ -71,16 +77,25 @@ public class SqlPraserController {
          String getTotalNums = "explain select count(*) from " + value;
          BigInteger total = db.getTotalNums(getTotalNums);
          BigInteger begin = new BigInteger("0");
+         // get the table structure
+         String getTableStructure = "select column_name from information_schema.columns where table_schema='" + srcDatabase + "' and table_name='" + value + "';";
+         List<Map<String, Object>> tableStructure = db.getTableStructure(getTableStructure);
          // slice the data in the tables
+         int count = 0; 
          while (begin.compareTo(total) <= 0) {
         	 	String FindData = "select * from "+ value + " limit " + batchSize + " offset " + begin;
         	 	List<Map<String, Object>> lists = db.getData(FindData);
+        	 	List<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
         	 	for (Map<String, Object> list : lists) {
         	 		// desensitize the data one by one
         	 		Map<String, Object> newData = desensitize.desensitize(list);
         	 		// insert the new data into the new database
-        	 		db.insert(value.toString(), newData);
+        	 		params.add(newData);
+        	 		//db.insert(value.toString(), newData);
         	 	}
+        	 	db.insertBatch(value.toString(), params, tableStructure);
+        	 	System.out.println("finished " + count + " batch");
+        	 	count += 1;
         	 	begin = begin.add(batchSize);
             }
          }				

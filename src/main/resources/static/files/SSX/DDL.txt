@@ -1,0 +1,15 @@
+CREATE TABLE `T_MD_AREAS` (
+  `ID` int(11) NOT NULL COMMENT '编码',
+  `AREANAME` text NOT NULL COMMENT '名称',
+  `PARENTID` int(11) NOT NULL COMMENT '上级编码',
+  `SHORTNAME` text COMMENT '名称简称',
+  `LEVEL` int(11) NOT NULL DEFAULT '0' COMMENT '行政级别',
+  `FLAG` int(11) DEFAULT '1' COMMENT '逻辑状态（1：使用；0：不使用）',
+  `WGS84_LNG` double DEFAULT NULL COMMENT '地球坐标系WGS84,经度',
+  `WGS84_LAT` double DEFAULT NULL COMMENT '地球坐标系WGS84,纬度',
+  `GCJ02_LNG` double DEFAULT NULL COMMENT '火星坐标系,经度(高德、腾讯、图灵、阿里地图)',
+  `GCJ02_LAT` double DEFAULT NULL COMMENT '火星坐标系,纬度(高德、腾讯、图灵、阿里地图)',
+  `BD09_LNG` double DEFAULT NULL COMMENT '百度坐标系,经度',
+  `BD09_LAT` double DEFAULT NULL COMMENT '百度坐标系,纬度',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='地区表';

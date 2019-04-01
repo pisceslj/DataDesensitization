@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @Configuration
 public class TargetDataSourceConfig {
@@ -24,8 +25,8 @@ public class TargetDataSourceConfig {
 		return targetDataSourceProperties().initializeDataSourceBuilder().build();
 	}
 	
-	@Bean(name = "jdbcTemplate2")
-	public JdbcTemplate jdbcTemplate() {
-		return new JdbcTemplate(targetDataSource());
+	@Bean(name = "NamedParameterJdbcTemplate")
+	public NamedParameterJdbcTemplate NamedParameterJdbcTemplate() {
+		return new NamedParameterJdbcTemplate(targetDataSource());
 	}
 }

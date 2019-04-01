@@ -14,6 +14,8 @@ import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,8 +25,9 @@ public class DbController {
 	private JdbcTemplate  jdbc;
 	
 	// target database
-	@Resource(name = "jdbcTemplate2")
-	private JdbcTemplate jdbc2;
+	//@Resource(name = "NamedParameterJdbcTemplate2")
+	@Autowired
+	private NamedParameterJdbcTemplate jdbc2;
 	
 	// select
 	public List<Map<String, Object>> getData(String sql) {
@@ -46,7 +49,7 @@ public class DbController {
 	}
 	
 	// insert a new data
-	public int insert(String table, Map<String, Object>list) {
+	/*public int insert(String table, Map<String, Object>list) {
 		// parse the field and values
 		Object key = "";
 		Object value = "";
@@ -74,5 +77,30 @@ public class DbController {
 		String sql = "insert into " + table + " " + field + " values " + values;
 		//System.out.println(sql);
 		return jdbc2.update(sql);
+	}*/
+	
+	// get the table structure
+	public List<Map<String, Object>> getTableStructure(String sql) {
+		List<Map<String, Object>> map = new ArrayList<Map<String, Object>>();
+		if (jdbc != null) {
+			map = jdbc.queryForList(sql);
+		}
+		return map;
+	}
+	
+	// insert with batch
+	public void insertBatch(String table, List<Map<String, Object>> params, List<Map<String, Object>> tableStructure) {
+		String fields = "";
+		String values = "";
+		for (int i = 0; i < tableStructure.size(); i++) {
+			fields += tableStructure.get(i).get("column_name") + ",";
+			values += ":" + tableStructure.get(i).get("column_name") + ",";
+		}
+		table = "`" + table + "`";
+		fields = "(" + fields.substring(0, fields.toString().length()-1) + ")";
+		values = "(" + values.substring(0, values.length()-1) + ")";
+		String sql = "insert into " + table + " " + fields + " values " + values;
+		// update the data with batch
+		jdbc2.batchUpdate(sql, SqlParameterSourceUtils.createBatch(params.toArray()));
 	}
 }

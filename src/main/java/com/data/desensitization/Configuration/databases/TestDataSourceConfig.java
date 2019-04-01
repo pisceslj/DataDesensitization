@@ -36,20 +36,6 @@ public class TestDataSourceConfig {
 		return testDataSourceProperties().initializeDataSourceBuilder().build();
 	}
 	
-	/*
-	 * entity manage object 
-	 */
-	//@Primary
-	//@Bean
-	/*public LocalContainerEntityManagerFactoryBean testEntityManagerFactory(
-            EntityManagerFactoryBuilder builder) {
-        return builder
-                .dataSource(testDataSource())
-                .packages("com.data.entity.dbFirst")
-                .persistenceUnit("firstDs")
-                .build();
-    }*/
-	
 	@Primary
 	@Bean
 	public JdbcTemplate jdbcTemplate() {
