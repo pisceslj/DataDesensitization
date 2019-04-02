@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.data.desensitization.controller.DbController;
 import com.data.desensitization.service.datastructure.BPlusTree;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,6 +29,9 @@ public class Desensitization implements DesensitizationAPI {
 	public static Desensitization desensitize;
 	
 	public static Utils utils = new Utils();
+	
+	@Autowired
+	public DbController db;
 	
 	@Override
 	public Map<String, Object> desensitize(Map<String, Object>list) {
@@ -70,9 +74,8 @@ public class Desensitization implements DesensitizationAPI {
 						break;
 					}
 					if (k.contains("ADDRESS") && fieldList.contains(key)) {
-						//int index = value.toString().indexOf("路");
-						//value = addressMask(value.toString(), index);
-						value = addressMapReplace(value.toString(), 1); // select the first method
+						value = addressMask(value.toString());
+						//value = addressMapReplace(value.toString(), 1); // select the first method
 						break;
 					}
 				}
@@ -138,12 +141,34 @@ public class Desensitization implements DesensitizationAPI {
 	}
 	
 	@Override
-	public String addressMask(String address, int index) {
+	public String addressMask(String address) {
+		String province = "", city = "", county = "", town = "", village = "";
 		if (StringUtils.isBlank(address)) {
 			return "";
 		}
-		int length = StringUtils.length(address);
-		return StringUtils.rightPad(StringUtils.left(address, index), length, "*");
+		/** parse the address */ 
+		Map<String, String> result = utils.parseAddress(address);
+		if (result != null && !result.isEmpty()) {
+				village = result.get("village");
+				if (!village.isEmpty()) {
+					village = village.replaceAll(".", "*");
+				}
+				if (!result.get("town").isEmpty()) {
+					town = result.get("town");
+				}
+				if (!result.get("county").isEmpty()) {
+					county = result.get("county");
+				}
+				if (!result.get("city").isEmpty()) {
+					city = result.get("city");
+				}
+				if (!result.get("province").isEmpty()) {
+					province = result.get("province");
+				}
+		}
+		//int length = StringUtils.length(address);
+		//return StringUtils.rightPad(StringUtils.left(address, index), length, "*");
+		return province + city + county + town + village;
 	}
 
 	/*
@@ -214,7 +239,8 @@ public class Desensitization implements DesensitizationAPI {
 	@Override
 	public String addressMapReplace(String address, int select) {
 		// convert the address into longitude and latitude
-		String result = utils.convertAddr(address);
+		 String result = utils.convertAddr(address);
+		//String result = db.getLngAndLat(utils.parseAddress(address)); 
 		double lng = Float.parseFloat(result.split(":")[0]);
 		double lat = Float.parseFloat(result.split(":")[1]);
 		// select the algorithm to deal with longitude and latitude
@@ -245,6 +271,7 @@ public class Desensitization implements DesensitizationAPI {
 		}
 		return utils.reMoveVar(newAddress, 1, 1)  +  "******";
 	}
+	
 	
 	@Override
 	public String idCardMapReplace(String idCard) {

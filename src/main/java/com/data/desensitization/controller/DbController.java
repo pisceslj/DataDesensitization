@@ -103,4 +103,82 @@ public class DbController {
 		// update the data with batch
 		jdbc2.batchUpdate(sql, SqlParameterSourceUtils.createBatch(params.toArray()));
 	}
+	
+	/**
+	 * parse the longitude and latitude from the address 
+	 * @param address
+	 * @return
+	 */
+	public String getLngAndLat(Map<String, String> address) {
+		String province = "", city = "", county = "", town = "", village = "";
+		if (!address.isEmpty()) {
+			village = address.get("village");
+			if (village != null && village.length() != 0) {
+				// send to MYSQL to get the longitude and latitude
+				String data_village = getRow(village);
+				if (data_village != "") {
+					return data_village;
+				}
+			}
+			town = address.get("town");
+			if (town != null && town.length() != 0) {
+				// send to MYSQL to get the longitude and latitude
+				String data_town = getRow(town);
+				if (data_town != "") {
+					return data_town;
+				}
+			}
+			county = address.get("country");
+			if (county != null && county.length() != 0) {
+				// send to MYSQL to get the longitude and latitude
+				String data_county = getRow(county);
+				if (data_county != "") {
+					return data_county;
+				}
+			}
+			city = address.get("city");
+			if (city != null && city.length() != 0) {
+				// send to MYSQL to get the longitude and latitude
+				String data_city = getRow(city);
+				if (data_city != "") {
+					return data_city;
+				}
+			}
+			province = address.get("province");
+			if (province != null && province.length() != 0) {
+				// send to MYSQL to get the longitude and latitude
+				String data_province = getRow(province);
+				if (data_province != "") {
+					return data_province;
+				}
+			}
+		}
+		// no value, so return the default value
+		return "116.23:39.54";
+	}
+	
+	/**
+	 * parse the address from longitude and latitude
+	 * @param data
+	 * @return
+	 */
+	/*public String getAddress(String data) {
+		
+	}*/
+	
+	public String getRow(String value) {
+		String sql = "select BD09_LNG, BD09_LAT from t_md_areas where AREANAME regexp '" + value + "'";
+		System.out.println(sql);
+		Map<String, Object> map = new HashMap<String, Object>();
+		if (jdbc != null) {
+			map = jdbc.queryForMap(sql);
+		}
+		/*if (map.isEmpty()) {
+			System.out.println("empty");
+			return "";
+		}*/
+		for (String key : map.keySet())
+			System.out.println(key  + ":" + map.get(key));
+		return map.get("BD09_LNG").toString() + ":" + map.get("BD09_LAT").toString();
+	}
 }

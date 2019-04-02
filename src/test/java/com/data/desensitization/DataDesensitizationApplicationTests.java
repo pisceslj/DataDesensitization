@@ -49,6 +49,11 @@ public class DataDesensitizationApplicationTests {
 	}
 	
 	@Test
+	public void TestAddressMask() {
+		System.out.println(desensitize.addressMask("北京市海淀区科学院南路6号中科院计算所"));
+	}
+	
+	@Test
 	public void TestAddressMapReplace() {
 		String str = desensitize.addressMapReplace("北京市海淀区科学院南路6号中科院计算所", 1);
 		System.out.println(str);
@@ -59,6 +64,12 @@ public class DataDesensitizationApplicationTests {
 		System.out.println(desensitize.nameMapReplace("卢杰杰"));
 	}
 	
+	@Test
+	public void TestgetLngAndLat() {
+		System.out.println(utils.parseAddress("北京市朝阳区"));
+		//System.out.println(utils.parseAddress("内蒙古自治区兴安盟科尔沁右翼前旗"));
+		System.out.println(utils.parseAddress("北京市海淀区科学院南路6号中科院计算所"));
+	}
 	
 	@Test
 	public void TestOrderInsertAndSearch() {

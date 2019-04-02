@@ -11,9 +11,11 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -206,11 +208,54 @@ public class Utils {
 		return newAddr;
 	}
 	
-	// delete the first and the last characters 
+	/**
+	 * parse address
+	 * @param address
+	 * @return
+	 */
+	public Map<String, String> parseAddress(String address) {
+		String regex = "(?<province>[^省]+自治区|.*?省|.*?行政区|.*?市)(?<city>[^市]+自治州|.*?地区|.*?行政单位|.+盟|.*?区|.*?市|.*?县)(?<county>[^县]+县|.+区|.+市|.+旗|.+海域|.+岛|.+路)?(?<town>[^区]+区|.+镇)?(?<village>.*)";
+		Matcher m = Pattern.compile(regex).matcher(address);
+		String province = null, city = null, county = null, town = null, village = null;
+		Map<String,String> rows = null;
+		System.out.println(address);
+		while(m.find()) {
+			rows = new LinkedHashMap<String,String>();
+			province = m.group("province");
+			System.out.println(province);
+			rows.put("province", province == null ? "":province.trim());
+			city=m.group("city");
+			System.out.println(city);
+			rows.put("city", city == null ? "":city.trim());
+			county=m.group("county");
+			System.out.println(county);
+			rows.put("county", county == null ? "":county.trim());
+			town=m.group("town");
+			System.out.println(town);
+			rows.put("town", town == null ? "":town.trim());
+			village=m.group("village");
+			rows.put("village", village == null ? "":village.trim());
+		}
+		System.out.println(rows);
+      return rows;
+	}
+	
+	/**
+	 * delete the first and the last characters 
+	 * @param str
+	 * @param begin
+	 * @param end
+	 * @return
+	 */
 	public String reMoveVar(String str, int begin, int end) {
 		return str.substring(begin, str.length() - end);
 	}
-		
+	
+	/**
+	 * get the name data from files
+	 * @param names
+	 * @param file
+	 */
 	public void getNameDatabase(String names[], String file) {
 		try {
 			String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();

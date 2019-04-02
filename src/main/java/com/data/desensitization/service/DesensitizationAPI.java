@@ -20,7 +20,7 @@ public interface DesensitizationAPI {
 	String phoneMask(String phone);
 	String telMask(String tel);
 	String emailMask(String email);
-	String addressMask(String address, int sensitiveSize);
+	String addressMask(String address);
 	
 	// random replacement
 	

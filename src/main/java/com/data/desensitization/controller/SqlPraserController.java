@@ -74,30 +74,33 @@ public class SqlPraserController {
             	}
 	       	}
          // get the total number of each table
-         String getTotalNums = "explain select count(*) from " + value;
-         BigInteger total = db.getTotalNums(getTotalNums);
-         BigInteger begin = new BigInteger("0");
-         // get the table structure
-         String getTableStructure = "select column_name from information_schema.columns where table_schema='" + srcDatabase + "' and table_name='" + value + "';";
-         List<Map<String, Object>> tableStructure = db.getTableStructure(getTableStructure);
-         // slice the data in the tables
-         int count = 0; 
-         while (begin.compareTo(total) <= 0) {
-        	 	String FindData = "select * from "+ value + " limit " + batchSize + " offset " + begin;
-        	 	List<Map<String, Object>> lists = db.getData(FindData);
-        	 	List<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
-        	 	for (Map<String, Object> list : lists) {
-        	 		// desensitize the data one by one
-        	 		Map<String, Object> newData = desensitize.desensitize(list);
-        	 		// insert the new data into the new database
-        	 		params.add(newData);
-        	 		//db.insert(value.toString(), newData);
-        	 	}
-        	 	db.insertBatch(value.toString(), params, tableStructure);
-        	 	System.out.println("finished " + count + " batch");
-        	 	count += 1;
-        	 	begin = begin.add(batchSize);
-            }
-         }				
-	}
+         if (!value.toString().contains("t_md_areas")) {
+        	 String getTotalNums = "explain select count(*) from " + value;
+             BigInteger total = db.getTotalNums(getTotalNums);
+             BigInteger begin = new BigInteger("0");
+             // get the table structure
+             String getTableStructure = "select column_name from information_schema.columns where table_schema='" + srcDatabase + "' and table_name='" + value + "';";
+             List<Map<String, Object>> tableStructure = db.getTableStructure(getTableStructure);
+             // slice the data in the tables
+             int count = 0; 
+             while (begin.compareTo(total) <= 0) {
+            	 	String FindData = "select * from "+ value + " limit " + batchSize + " offset " + begin;
+            	 	List<Map<String, Object>> lists = db.getData(FindData);
+            	 	List<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
+            	 	for (Map<String, Object> list : lists) {
+            	 		// desensitize the data one by one
+            	 		Map<String, Object> newData = desensitize.desensitize(list);
+            	 		// insert the new data into the new database
+            	 		params.add(newData);
+            	 		//db.insert(value.toString(), newData);
+            	 	}
+            	 	db.insertBatch(value.toString(), params, tableStructure);
+            	 	System.out.println("finished " + count + " batch");
+            	 	count += 1;
+            	 	begin = begin.add(batchSize);
+                }
+         	}
+        
+       }// end for			
+	 }// end function
 }
