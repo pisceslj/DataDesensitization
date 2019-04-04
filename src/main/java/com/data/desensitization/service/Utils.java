@@ -218,25 +218,25 @@ public class Utils {
 		Matcher m = Pattern.compile(regex).matcher(address);
 		String province = null, city = null, county = null, town = null, village = null;
 		Map<String,String> rows = null;
-		System.out.println(address);
+		//System.out.println(address);
 		while(m.find()) {
 			rows = new LinkedHashMap<String,String>();
 			province = m.group("province");
-			System.out.println(province);
+			//System.out.println(province);
 			rows.put("province", province == null ? "":province.trim());
 			city=m.group("city");
-			System.out.println(city);
+			//System.out.println(city);
 			rows.put("city", city == null ? "":city.trim());
 			county=m.group("county");
-			System.out.println(county);
+			//System.out.println(county);
 			rows.put("county", county == null ? "":county.trim());
 			town=m.group("town");
-			System.out.println(town);
+			//System.out.println(town);
 			rows.put("town", town == null ? "":town.trim());
 			village=m.group("village");
 			rows.put("village", village == null ? "":village.trim());
 		}
-		System.out.println(rows);
+		//System.out.println(rows);
       return rows;
 	}
 	

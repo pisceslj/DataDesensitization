@@ -40,11 +40,11 @@ public class DbController {
 	// total number
 	public BigInteger getTotalNums(String sql) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		BigInteger total;
+		BigInteger total = new BigInteger("0");
 		if (jdbc != null) {
 			map = jdbc.queryForMap(sql);
 		}
-		total = (BigInteger) map.get("rows");
+		total = new BigInteger(map.get("count(*)").toString());
 		return total;
 	}
 	
@@ -88,8 +88,13 @@ public class DbController {
 		return map;
 	}
 	
-	// insert with batch
-	public void insertBatch(String table, List<Map<String, Object>> params, List<Map<String, Object>> tableStructure) {
+	/**
+	 * insert with batch
+	 * @param table
+	 * @param params
+	 * @param tableStructure
+	 */
+	public int[] insertBatch(String table, List<Map<String, Object>> params, List<Map<String, Object>> tableStructure) {
 		String fields = "";
 		String values = "";
 		for (int i = 0; i < tableStructure.size(); i++) {
@@ -101,7 +106,7 @@ public class DbController {
 		values = "(" + values.substring(0, values.length()-1) + ")";
 		String sql = "insert into " + table + " " + fields + " values " + values;
 		// update the data with batch
-		jdbc2.batchUpdate(sql, SqlParameterSourceUtils.createBatch(params.toArray()));
+		return jdbc2.batchUpdate(sql, SqlParameterSourceUtils.createBatch(params.toArray()));
 	}
 	
 	/**

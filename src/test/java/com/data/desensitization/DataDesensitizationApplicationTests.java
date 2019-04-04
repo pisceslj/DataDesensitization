@@ -28,7 +28,7 @@ public class DataDesensitizationApplicationTests {
 	
 	@Test
 	public void TestCalculateNums() {
-		String sql = "explain select count(*) from privateinfo";
+		String sql = "select count(*) from vote_record_10w";
 		System.out.println(db.getTotalNums(sql));
 	}
 	

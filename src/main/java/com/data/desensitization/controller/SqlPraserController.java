@@ -75,7 +75,7 @@ public class SqlPraserController {
 	       	}
          // get the total number of each table
          if (!value.toString().contains("t_md_areas")) {
-        	 String getTotalNums = "explain select count(*) from " + value;
+        	 String getTotalNums = "select count(*) from " + value;
              BigInteger total = db.getTotalNums(getTotalNums);
              BigInteger begin = new BigInteger("0");
              // get the table structure
@@ -83,8 +83,14 @@ public class SqlPraserController {
              List<Map<String, Object>> tableStructure = db.getTableStructure(getTableStructure);
              // slice the data in the tables
              int count = 0; 
+             String FindData = ""; 
              while (begin.compareTo(total) <= 0) {
-            	 	String FindData = "select * from "+ value + " limit " + batchSize + " offset " + begin;
+            	 	if (begin.compareTo(total) <=0 && begin.add(batchSize).compareTo(total) >= 0) {
+            	 		FindData = "select * from "+ value + " limit " + total.subtract(begin) + " offset " + begin;
+            	 		System.out.println(total.subtract(begin));
+            	 	} else { 
+            	 		FindData = "select * from "+ value + " limit " + batchSize + " offset " + begin;
+            	 		}
             	 	List<Map<String, Object>> lists = db.getData(FindData);
             	 	List<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
             	 	for (Map<String, Object> list : lists) {
@@ -94,8 +100,10 @@ public class SqlPraserController {
             	 		params.add(newData);
             	 		//db.insert(value.toString(), newData);
             	 	}
-            	 	db.insertBatch(value.toString(), params, tableStructure);
-            	 	System.out.println("finished " + count + " batch");
+            	 	System.out.println(count + " : " + params.size());
+            	 	int result[] = db.insertBatch(value.toString(), params, tableStructure);
+            	 	//System.out.println("finished " + count + " batch");
+            	 	//System.out.println(result.length);
             	 	count += 1;
             	 	begin = begin.add(batchSize);
                 }
