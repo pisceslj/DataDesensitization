@@ -27,4 +27,4 @@ I created a database with millions data, the database is as follows:
 
 the result of test with millions data is as follows:
 
-![Image text](https://github.com/pisceslj/DataDesensitization/blob/master/pictures/testMillions.jpg)
+![Image text](https://github.com/pisceslj/DataDesensitization/blob/batch_v1.0/pictures/testMillions.jpg)
