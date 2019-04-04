@@ -24,3 +24,7 @@ TEST is as follows:
 I created a database with millions data, the database is as follows:
 
 ![Image text](https://github.com/pisceslj/DataDesensitization/blob/master/pictures/millions.jpg)
+
+the result of test with millions data is as follows:
+
+![Image text](https://github.com/pisceslj/DataDesensitization/blob/master/pictures/testMillions.jpg)
